@@ -1,3 +1,7 @@
+from .user import Role
+
+PAGE_SIZE = 9
+
 class Display:
 
     @staticmethod
@@ -40,11 +44,51 @@ class Display:
         print(" Invalid choice\n")
 
     @staticmethod
-    def display_users(users):
+    # Ajouter en mode csv en gros on a un header avec firstname lastname region etc
+    # et ensuite on affiche que les infos du header
+    # rajouter un index a cote de chaque user de 1 - 9 pour les selctionner
+    # 0 pour quitter et n pour next
+    def display_users(users, page: int):
+        if not users:
+            print("\n--- USERS LIST ---")
+            print("No users found.\n")
+            return
+
+        total = len(users)
+
+        headers = ["Firstname", "Name", "Username", "Email", "Region","Role"]
+
+        start = page * PAGE_SIZE
+        end = start + PAGE_SIZE
+
         print("\n--- USERS LIST ---")
-        for u in users:
-            print(u)
-        print()
+
+        rows = [
+            [u.firstname, u.name, u.username, u.email, u.region, Role(u.role)] for u in users
+        ]
+
+        # largeur des colonnes
+        col_widths = [
+            max(len(row[i]) for row in ([headers] + rows)) for i in range(len(headers))
+        ]
+
+        # header
+        header_line = " | ".join(
+            headers[i].ljust(col_widths[i]) for i in range(len(headers))
+        )
+        print(header_line)
+        print("-" * len(header_line))
+
+        # lignes
+        for row in rows:
+            print(
+                " | ".join(
+                    row[i].ljust(col_widths[i]) for i in range(len(row))
+                )
+            )
+
+        print(f"\nPage {page + 1} / {((total - 1) // PAGE_SIZE) + 1}")
+        print("n = next page | 0 = quit")
 
     @staticmethod
     def ask_create_user():

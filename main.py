@@ -2,6 +2,7 @@ import os
 from typing import Optional
 from models.user import User, Role
 from models.display import Display
+from models.menu import Menu, MenuSelection, MenuType
 
 MAX_ATTEMPTS = 3
 DB_PATH = "db/Patient-First.db"
@@ -34,42 +35,15 @@ def main():
     if not user or user == -1:
         return 0
     Display.welcome_user(user.firstname)
-    breakpoint()
 
-    # while True:
-    #     Display.display_menu()
-    #     choice = Display.ask_choice()
-
-    #     if choice == "1":
-    #         users = User.get_all()
-    #         Display.display_users(users)
-
-    #     elif choice == "2":
-    #         data = Display.ask_create_user()
-
-    #         new_user = User(
-    #             firstname=data["firstname"],
-    #             name=data["name"],
-    #             region=data["region"],
-    #             username=data["username"],
-    #             email=data["email"],
-    #             role=Role.USER
-    #         )
-    #         new_user.create(data["password"])
-    #         Display.user_created()
-
-    #     elif choice == "3":
-    #         user_id = Display.ask_delete_user()
-    #         u = User(id=user_id)
-    #         u.delete()
-    #         Display.user_deleted()
-
-    #     elif choice == "4":
-    #         print("\nBye")
-    #         break
-
-    #     else:
-    #         Display.invalid_choice()
+    user_exit = False
+    menu = MenuSelection(MenuType.MAIN_MENU)
+    while not user_exit:
+        match(menu):
+            case MenuType.MAIN_MENU:
+                user_exit = Menu.main_menu(user)
+            case MenuType.CREATED_USER:
+                user_exit = Menu.created_user()
 
 
 if __name__ == "__main__":

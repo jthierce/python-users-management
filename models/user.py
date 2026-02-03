@@ -24,10 +24,19 @@ class User:
     role: Role = Role.USER
     blocked_at: Optional[str] = None
 
-    
-    def get(self, Sname, firstname):
-        # check si le user a le droit d'affichier
-        pass
+    def list(self):
+        if (self.role < int(Role.ADMIN)):
+            print("Unhautorized access")
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute("""
+            SELECT *
+            FROM users
+            ORDER BY name, firstname
+        """)
+        row = cur.fetchall()
+        return row
     
     def delete(self):
         pass
