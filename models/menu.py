@@ -24,18 +24,19 @@ class Menu:
             case 1:
                 users = user.list()
                 chunks = [users[i:i+9] for i in range(0, len(users), 9)]
-                for i in chunks:
-                    Display.display_users(i)
+                for i, value in chunks:
+                    is_last_element = i == len(chunks) - 1
+                    Display.display_users(value, i, is_last_element)
                     # rAJOUTER LA METHODE QUI PERMET DE SELECTIONER LE USER OU DE NEXT LA PAGE OU DE QUITTER
-                    choice = Display.choose_users()
                     valid_input = False
                     while not valid_input:
+                        choice = Display.choose_users()
                         match(choice):
                             case x if 1 <= int(x) <= 9:
                                 return Menu.user(User.from_row(i[int(x)]))
-                                valid_input = True
                             case "n":
-                                valid_input = True
+                                if not is_last_element:
+                                    valid_input = True
                             case "0":
                                 return True
                             case _:
@@ -67,10 +68,19 @@ class Menu:
     @staticmethod
     def user(user: User):
         #Rajouter aussi la methode pour ceci
-        Display.User(user)
+        Display.user(user)
         choice = Display.ask_user()
         
-        match(choice):
+        while True
+            match(int(choice)):
+                case(1):
+                    return Menu.update_user()
+                case(2):
+                    return Menu.Delete_user()
+                case(0):
+                    return True
+                case _:
+                    print("Invalide output")
     
                 
     @staticmethod

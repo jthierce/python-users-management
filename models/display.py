@@ -48,7 +48,7 @@ class Display:
     # et ensuite on affiche que les infos du header
     # rajouter un index a cote de chaque user de 1 - 9 pour les selctionner
     # 0 pour quitter et n pour next
-    def display_users(users, page: int):
+    def display_users(users, page: int, is_last_page):
         if not users:
             print("\n--- USERS LIST ---")
             print("No users found.\n")
@@ -88,7 +88,10 @@ class Display:
             )
 
         print(f"\nPage {page + 1} / {((total - 1) // PAGE_SIZE) + 1}")
-        print("n = next page | 0 = quit")
+        if is_last_page:
+            print("n = next page | 0 = quit")
+        else:
+            print("0 = quit")
 
     @staticmethod
     def ask_create_user():
