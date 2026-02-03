@@ -29,11 +29,11 @@ CREATE TABLE IF NOT EXISTS users(
 )
 """)
 
-# rajouter la creation du super admin 
 name = input("Insert the name of the superadmin:\n").strip().lower()
 firstname = input("Insert the firstname of the superadmin:\n").strip().lower()
 
 attemp_password = 0
+password = ""
 while (attemp_password < 3):
     password = getpass.getpass("Insert password:\n").strip()
     confirm_password = getpass.getpass("Confirm the password:\n").strip()
@@ -50,20 +50,18 @@ if attemp_password == 3:
     os.remove(DB_PATH)
     sys.exit(0)
 
-username = firstname[0] + name[0] + name
+username = firstname[0] + name
 try:
     con.execute("""
                 INSERT INTO users
                 (name, firstname, username, email, region, password, role)
                 VALUES (?,?,?,?,?,?, 2)
-    """, (name.strip(), firstname.strip(), username, username + "@american-hosptial.intranet", 'Paris', Util.encrypt_password(password)))
+    """, (name.strip(), firstname.strip(), username, username + "@american-hosptial.intranet", 'Paris', Util.encrypt_password(password), 2))
 except Exception as e:
     print("Error in db:\n" + str(e))
     con.close()
     os.remove(DB_PATH)
     sys.exit(0)
 print("User created\n")
-
-
 con.commit()
 con.close()
