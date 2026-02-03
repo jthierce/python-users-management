@@ -1,10 +1,16 @@
+import os
 from typing import Optional
 from models.user import User, Role
 from models.display import Display
 
 MAX_ATTEMPTS = 3
+DB_PATH = "db/Patient-First.db"
 
 def main():
+    if not os.path.isfile(DB_PATH):
+        print("The db doesn't exist, pls launch initialisation.py before")
+        return 0
+
     Display.display_welcome()
 
     attempts = 0
