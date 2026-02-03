@@ -4,6 +4,7 @@ import os
 # Plus propre d'utiliser sys.exit dans un script que exit, aller voir de la doc si necessaire
 import sys
 from models.utils import Util
+from models.user import Role
 
 # Constante
 DB_PATH = "db/Patient-First.db"
@@ -23,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users(
     username TEXT NOT NULL,
     email TEXT NOT NULL,
     region TEXT NOT NULL,
-    password BLOB NOT NULL,
+    password TEXT NOT NULL,
     blocked_at NUMERIC,
     role INTEGER NOT NULL DEFAULT 0
 )
@@ -55,8 +56,14 @@ try:
     con.execute("""
                 INSERT INTO users
                 (name, firstname, username, email, region, password, role)
-                VALUES (?,?,?,?,?,?, 2)
-    """, (name.strip(), firstname.strip(), username, username + "@american-hosptial.intranet", 'Paris', Util.encrypt_password(password), 2))
+                VALUES (?,?,?,?,?,?,?)
+    """,
+    (name.strip(),
+    firstname.strip(),
+    username, username + "@american-hosptial.intranet",
+    'Paris',
+    Util.encrypt_password(password),
+    int(Role.SUPER_ADMIN)))
 except Exception as e:
     print("Error in db:\n" + str(e))
     con.close()

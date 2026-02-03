@@ -2,7 +2,7 @@ from enum import IntEnum
 from dataclasses import dataclass
 from typing import Optional
 import sqlite3
-from utils import Util
+from .utils import Util
 import getpass
 import datetime
 
@@ -39,36 +39,57 @@ class User:
         pass
     
     @staticmethod
-    def login_super_admin(username, custom_message = "Invalid password, retry"):
-        limit_time = datetime.datetime.now() + datetime.timedelta(hours=8)
+    def login_admin(username: str, custom_message = "Invalid password, retry"):
+        limit_time = datetime.datetime.now() - datetime.timedelta(hours=8)
         con = sqlite3.connect(DB_PATH)
         con.row_factory = sqlite3.Row
         cur = con.cursor()
-        cur.execute("""
-        SELECT *
-        FROM users
-        WHERE username = ?
-          AND role = ?
-          AND(
-            blocked_at IS NULL
-            OR blocked_at > ?
-          )
-        LIMIT 1
-        """, (username, int(Role.SUPER_ADMIN), limit_time))
+        try:
+            cur.execute("""
+            SELECT *
+            FROM users
+            WHERE username = ?
+            AND role >= ?
+            AND(
+                blocked_at IS NULL
+                OR blocked_at <= ?
+            )
+            LIMIT 1
+            """, (username, int(Role.ADMIN), limit_time))
 
-        row = cur.fetchone()
-        if row is None:
-            return None
-        i = 0
-        same_password = False
-        while(i < 3 and same_password is False):
-            password = Util.encrypt_password(getpass.getpass("Password:\n"))
-            i += 1
-            same_password = password == row["password"]
-        if(same_password is False):
-            row["blocket_at"] = datetime.datetime.now()
-            # la on save la nuvelle data
-            cur.execute(save)
-            return None
-        
-        return User(row["id"], row["firstname"], row["name"], row["region"], row["username"], row["email"], row["role"], row["blocket_at"])
+            row = cur.fetchone()
+            if row is None:
+                return None
+            same_password = False
+            for _ in range(3):
+                password = getpass.getpass("Password:\n")
+                same_password = Util.check_password(password, row["password"])
+                if not same_password:
+                    print(custom_message)
+                else:
+                    break
+            if not same_password:
+                now = datetime.datetime.now()
+                cur.execute(
+                    "UPDATE users SET blocked_at = ? WHERE id = ?",
+                    (now, row["id"])
+                )
+                con.commit()
+                return -1
+            
+            return User.from_row(row)
+        finally:
+            con.close()
+    
+    @classmethod
+    def from_row(cls, row):
+        return cls(
+            row["id"],
+            row["firstname"],
+            row["name"],
+            row["region"],
+            row["username"],
+            row["email"],
+            row["role"],
+            row["blocked_at"],
+        )
