@@ -1,4 +1,4 @@
-from .user import Role
+from .user import Role, User
 
 PAGE_SIZE = 9
 
@@ -14,14 +14,6 @@ class Display:
     @staticmethod
     def ask_login():
         return input("Login:\n").lower()
-    
-    @staticmethod
-    def ask_password():
-        return input("Password:\n")
-
-    @staticmethod
-    def auth_failed():
-        print("\n Authentication failed.\n")
 
     @staticmethod
     def welcome_user(firstname):
@@ -36,19 +28,10 @@ class Display:
         print("4. Exit")
 
     @staticmethod
-    def ask_choice():
-        return input("Choice: ")
-
-    @staticmethod
-    def invalid_choice():
-        print(" Invalid choice\n")
-
-    @staticmethod
     # Ajouter en mode csv en gros on a un header avec firstname lastname region etc
     # et ensuite on affiche que les infos du header
     # rajouter un index a cote de chaque user de 1 - 9 pour les selctionner
-    # 0 pour quitter et n pour next
-    def display_users(users, page: int, is_last_page):
+    def display_users(users, page: int):
         if not users:
             print("\n--- USERS LIST ---")
             print("No users found.\n")
@@ -67,19 +50,16 @@ class Display:
             [u.firstname, u.name, u.username, u.email, u.region, Role(u.role)] for u in users
         ]
 
-        # largeur des colonnes
         col_widths = [
             max(len(row[i]) for row in ([headers] + rows)) for i in range(len(headers))
         ]
 
-        # header
         header_line = " | ".join(
             headers[i].ljust(col_widths[i]) for i in range(len(headers))
         )
         print(header_line)
         print("-" * len(header_line))
 
-        # lignes
         for row in rows:
             print(
                 " | ".join(
@@ -88,10 +68,30 @@ class Display:
             )
 
         print(f"\nPage {page + 1} / {((total - 1) // PAGE_SIZE) + 1}")
-        if is_last_page:
-            print("n = next page | 0 = quit")
-        else:
-            print("0 = quit")
+        
+    @staticmethod
+    def display_user(user: User):
+        # Rajouter les infos du user prorement, ensuite le menu 1) Update, 2)Delete 3)Exit
+        print("1)Update,2)Delete,3)exit")
+    
+    @staticmethod
+    def diplay_update_user():
+        #Peut etre changer d'une autre facon comment c'est display
+        i = 1
+        text_to_display = ""
+        for value in User.UPDATABLE_FIELD:
+            text_to_display += f"#{i})#{value} "
+            i += 1
+        print(text_to_display + "0) exit")
+    
+    @staticmethod
+    def display_role_user():
+        for i, role in enumerate(
+            [r for r in Role if r != Role.SUPER_ADMIN],
+            start=1
+        ):
+            print(f"{i}) {role.name.title()}")
+        print("0) Exit")
 
     @staticmethod
     def ask_create_user():
@@ -110,160 +110,68 @@ class Display:
         print("\n--- DELETE USER ---")
         return input("User ID to delete: ")
 
-
     @staticmethod
     def user_created():
-        print(" User created successfully\n")
+        print("User created successfully\n")
 
+    # Vraiment utile?
     @staticmethod
     def user_deleted():
-        print(" User deleted successfully\n")
+        print("User deleted successfully\n")
 
+    @staticmethod
+    def ask_choice(number_of_choice: int):
+        valid_inputs = list(range(1, number_of_choice + 1))
+        print(f"Choose a options:")
+        user_input = None
+        while not user_input in valid_inputs:
+            if not user_input is None:
+                print("Invalid input")
+            user_input = int(input("[1-#{number_of_choice + 1}]"))
+        return user_input
 
-
-
-
-
-
-
-#         import shutil
-# from getpass import getpass
-
-# class Display:
-
-#     # ------------------------------------------------------------------
-#     # Cadre responsive avec texte centré
-#     # ------------------------------------------------------------------
-#     @classmethod
-#     def frame_block(cls, lines):
-#         # Largeur du terminal
-#         term_width = shutil.get_terminal_size().columns
-
-#         # Longueur max du texte
-#         max_len = min(max(len(line) for line in lines), term_width - 6)
-
-#         # Largeur du cadre
-#         width = max_len + 4
-
-#         print("*" * width)
-#         for line in lines:
-#             centered = line.center(max_len)
-#             print(f"* {centered} *")
-#         print("*" * width)
-#         print()
-
-#     # ------------------------------------------------------------------
-#     # Workflow Login
-#     # ------------------------------------------------------------------
-#     @classmethod
-#     def display_welcome(cls):
-#         cls.frame_block([
-#             "Welcome to American Hospital",
-#             "",
-#             "Entrer votre login :"
-#         ])
-#         return input("> ")
-
-#     @classmethod
-#     def ask_password(cls):
-#         cls.frame_block(["Entrer votre mot de passe"])
-#         return getpass("> ")
-
-#     @classmethod
-#     def auth_success(cls):
-#         cls.frame_block(["Authentification reussi"])
-
-#     @classmethod
-#     def auth_failed(cls):
-#         cls.frame_block(["Authentification échouée"])
-
-#     # ------------------------------------------------------------------
-#     # Menus
-#     # ------------------------------------------------------------------
-#     @classmethod
-#     def display_main_menu(cls):
-#         cls.frame_block([
-#             "MAIN MENU",
-#             "",
-#             "1. Create User",
-#             "2. List User",
-#             "3. Find User",
-#             "4. Exit"
-#         ])
-#         return input("> ")
-
-#     @classmethod
-#     def display_list_menu(cls):
-#         cls.frame_block([
-#             "USERS LIST",
-#             "",
-#             "1. Afficher les utilisateurs (1 par ligne)",
-#             "-> username | firstname | email | etc.",
-#             "",
-#             "2. Afficher 9 utilisateurs maximum",
-#             "",
-#             "0. Retourner au menu principal"
-#         ])
-#         return input("> ")
-
-#     @classmethod
-#     def display_user_menu(cls, user):
-#         cls.frame_block([
-#             "USER INFORMATION",
-#             "",
-#             f"Username : {user['username']}",
-#             f"Firstname : {user['firstname']}",
-#             f"Email : {user['email']}",
-#             "",
-#             "1. Update the user",
-#             "2. Delete the user",
-#             "3. Return to the main menu"
-#         ])
-#         return input("> ")
-
-# # ----------------------------------------------------------------------
-# # Exemple de workflow complet
-# # ----------------------------------------------------------------------
-
-# def main():
-#     # Identifiants fictifs
-#     admin_login = "admin"
-#     admin_password = "1234"
-
-#     # Login
-#     login = Display.display_welcome()
-#     password = Display.ask_password()
-
-#     if login == admin_login and password == admin_password:
-#         Display.auth_success()
-#     else:
-#         Display.auth_failed()
-#         return
-
-#     # Menu principal
-#     while True:
-#         choice = Display.display_main_menu()
-
-#         if choice == "1":
-#             Display.frame_block(["Création d'utilisateur (à implémenter)"])
-
-#         elif choice == "2":
-#             Display.display_list_menu()
-
-#         elif choice == "3":
-#             fake_user = {
-#                 "username": "jdoe",
-#                 "firstname": "John",
-#                 "email": "john@doe.com"
-#             }
-#             Display.display_user_menu(fake_user)
-
-#         elif choice == "4":
-#             Display.frame_block(["Au revoir"])
-#             break
-
-#         else:
-#             Display.frame_block(["Choix invalide"])
-
-# if __name__ == "__main__":
-#     main()
+    @staticmethod
+    # a verifier
+    def ask_select_users(users_number: int):
+        valid_inputs = list(map(str, range(0, users_number + 1)))
+        text = "Choose users [1-9], 0 Exit"
+        if users_number is 9:
+            text += ", (N) Next page"
+            valid_inputs += ["n"]
+        print(text)
+        user_input = None
+        while not user_input in valid_inputs:
+            if not user_input is None:
+                print("Invalid input")
+            user_input = input("Choose users to get the options of him").lower()
+        return user_input
+    
+    @staticmethod
+    def ask_user():
+        valid_inputs = list(range(1, 4))
+        user_input = None
+        while not user_input in valid_inputs:
+            if not user_input is None:
+                print("Invalid input")
+            user_input = int(input("[1-3]:"))
+        return user_input
+    
+    @staticmethod
+    def ask_update_user():
+        valid_inputs = list(range(0, len(User.UPDATABLE_FIELD) + 1))
+        user_input = None
+        while not user_input in valid_inputs:
+            if not user_input is None:
+                print("Invalid input")
+            user_input = int(input(f"[0-#{len(User.UPDATABLE_FIELD)}]"))
+        return user_input
+    
+    @staticmethod
+    def ask_role_user():
+        valid_inputs = list(range(0, len(Role) + 1))
+        user_input = None
+        while not user_input in valid_inputs:
+            if not user_input is None:
+                print("Invalid input")
+            user_input = int(input(f"[0-#{len(Role) + 1}]"))
+        return user_input

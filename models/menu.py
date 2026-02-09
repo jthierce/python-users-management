@@ -2,6 +2,8 @@ from .display import Display
 from .user import User
 from enum import IntEnum
 
+MAIN_MENU_CHOICE = 4
+
 class MenuType(IntEnum):
     MAIN_MENU = 0
     CREATED_USER = 1
@@ -19,28 +21,19 @@ class Menu:
     @staticmethod
     def main_menu(user: User):
         Display.display_menu()
-        choice = Display.ask_choice()
-        match(int(choice)):
+        choice = Display.ask_choice(MAIN_MENU_CHOICE)
+        match(choice):
             case 1:
                 users = user.list()
                 chunks = [users[i:i+9] for i in range(0, len(users), 9)]
                 for i, value in chunks:
-                    is_last_element = i == len(chunks) - 1
-                    Display.display_users(value, i, is_last_element)
-                    # rAJOUTER LA METHODE QUI PERMET DE SELECTIONER LE USER OU DE NEXT LA PAGE OU DE QUITTER
-                    valid_input = False
-                    while not valid_input:
-                        choice = Display.choose_users()
-                        match(choice):
-                            case x if 1 <= int(x) <= 9:
-                                return Menu.user(User.from_row(i[int(x)]))
-                            case "n":
-                                if not is_last_element:
-                                    valid_input = True
-                            case "0":
-                                return True
-                            case _:
-                                print("Invalid input, retry")
+                    Display.display_users(value, i)
+                    choice = Display.ask_select_users(len(value))
+                    match(choice):
+                        case x if x in list(map(str, range(1, len(value) + 1))):
+                            return Menu.user(User.from_row(value[int(choice) - 1]))
+                        case "0":
+                            return True
             case 2:
                 data = Display.ask_create_user()
 
@@ -61,28 +54,63 @@ class Menu:
                 Display.user_deleted()
             case 4:
                 print("\nBye")
-                break
-            case _:
-                Display.invalid_choice()
+                return 1
         
     @staticmethod
-    def user(user: User):
+    def user(user: User, selected_user: User):
         #Rajouter aussi la methode pour ceci
-        Display.user(user)
+        Display.display_user(user)
         choice = Display.ask_user()
         
-        while True
-            match(int(choice)):
-                case(1):
-                    return Menu.update_user()
-                case(2):
-                    return Menu.Delete_user()
-                case(0):
-                    return True
-                case _:
-                    print("Invalide output")
+        match(int(choice)):
+            case(1):
+                return Menu.update_user(user, selected_user)
+            case(2):
+                return user.delete_user(selected_user)
+            case(3):
+                return True
+            
+    @staticmethod
+    def update_user(user:User, updated_user: User):
+        Display.diplay_update_user()
+        match(Display.ask_update_user()):
+            case 0:
+                return True
+            case 1:
+                new_firstname = input("Insert the new firstname")
+                user.udpate_firstname(updated_user)
+                print("Updated firstname succesfully")
+                return True
+            case 2:
+                new_name = input("Insert the new name")
+                user.update_name(updated_user)
+            case 3:
+                # si on a envie rajouter une constante qui permet de chosir des regions fix
+                # d'ailleurs on pourrait lock le choix des regions dans la db
+                new_region = input("Insert the new region")
+                user.update_region(updated_user)
+                return True
+            case 4:
+                new_username = input("Insert the new username")
+                user.update_username(updated_user)
+                return True
+            case 5:
+                new_email = input("Insert the new email")
+                user.update_email(updated_user)
+                return True
+            case 6:
+                return Menu.update_role_user(user, updated_user)
+        return True
     
-                
+    @staticmethod
+    def update_role_user(user: User, updated_user: User):
+        Display.display_role_user()
+        new_role = Display.ask_role_user()
+        if new_role is 0:
+            return True
+        User.update_role(updated_user, new_role)
+        return True
+        
     @staticmethod
     def created_user():
         return False

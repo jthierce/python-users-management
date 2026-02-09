@@ -23,6 +23,8 @@ class User:
     email: str = ""
     role: Role = Role.USER
     blocked_at: Optional[str] = None
+    
+    UPDATABLE_FIELD = ["firstname", "name", "region", "username", "email", "role"]
 
     def list(self):
         if (self.role < int(Role.ADMIN)):
