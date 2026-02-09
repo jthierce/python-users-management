@@ -120,7 +120,7 @@ class Display:
         print("User deleted successfully\n")
 
     @staticmethod
-    def ask_choice(number_of_choice: int):
+    def ask_main_menu(number_of_choice: int):
         valid_inputs = list(range(1, number_of_choice + 1))
         print(f"Choose a options:")
         user_input = None

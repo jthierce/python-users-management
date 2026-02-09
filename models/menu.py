@@ -2,13 +2,11 @@ from .display import Display
 from .user import User
 from enum import IntEnum
 
-MAIN_MENU_CHOICE = 4
-
 class MenuType(IntEnum):
     MAIN_MENU = 0
-    CREATED_USER = 1
-    LIST_USERS = 2
-    USER = 5
+    LIST_USERS = 1
+    FIND_USER = 2
+    CREATED_USER = 3
     
 class MenuSelection:
     def __init__(self, menu: MenuType):
@@ -21,9 +19,9 @@ class Menu:
     @staticmethod
     def main_menu(user: User):
         Display.display_menu()
-        choice = Display.ask_choice(MAIN_MENU_CHOICE)
+        choice = Display.ask_main_menu(len(MenuType))
         match(choice):
-            case 1:
+            case MenuType.LIST_USERS.value:
                 users = user.list()
                 chunks = [users[i:i+9] for i in range(0, len(users), 9)]
                 for i, value in chunks:
@@ -34,7 +32,9 @@ class Menu:
                             return Menu.user(User.from_row(value[int(choice) - 1]))
                         case "0":
                             return True
-            case 2:
+            case MenuType.FIND_USER.value:
+                Menu.find_user()
+            case MenuType.CREATED_USER.value:
                 data = Display.ask_create_user()
 
                 new_user = User(
@@ -47,14 +47,9 @@ class Menu:
                 )
                 new_user.create(data["password"])
                 Display.user_created()
-            case 3:
-                user_id = Display.ask_delete_user()
-                u = User(id=user_id)
-                u.delete()
-                Display.user_deleted()
             case 4:
                 print("\nBye")
-                return 1
+                return True
         
     @staticmethod
     def user(user: User, selected_user: User):
@@ -66,7 +61,9 @@ class Menu:
             case(1):
                 return Menu.update_user(user, selected_user)
             case(2):
-                return user.delete_user(selected_user)
+                user.delete_user(selected_user)
+                print("User deleted succesfully")
+                return True
             case(3):
                 return True
             
@@ -106,7 +103,7 @@ class Menu:
     def update_role_user(user: User, updated_user: User):
         Display.display_role_user()
         new_role = Display.ask_role_user()
-        if new_role is 0:
+        if new_role == 0:
             return True
         User.update_role(updated_user, new_role)
         return True
