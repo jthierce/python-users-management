@@ -82,7 +82,7 @@ class Display:
         for value in User.UPDATABLE_FIELD:
             text_to_display += f"#{i})#{value} "
             i += 1
-        print(text_to_display + "0) exit")
+        print(text_to_display + "0) exit/save")
     
     @staticmethod
     def display_role_user():
@@ -102,7 +102,7 @@ class Display:
             "region": input("Region: "),
             "username": input("Username: "),
             "email": input("Email: "),
-            "password": input("Password: "),
+            "password": input("Password (leave empty to generate a random one): ")
         }
     
     @staticmethod

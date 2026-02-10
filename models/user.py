@@ -41,14 +41,34 @@ class User:
         return row
     
     def delete(self):
-        pass
+        con = sqlite3.connect(DB_PATH)
+        cur = con.cursor()
+        cur.execute("""
+            DELETE FROM users
+            WHERE id = ?
+        """, (self.id,))
+        con.commit()
+        con.close()
     
-    def update(self, firstname, name, password, region, email, username):
-        pass
-    
-    def create(self):
-        pass
-    
+    def save(self):
+        con = sqlite3.connect(DB_PATH)
+        cur = con.cursor()
+        cur.execute("""
+            UPDATE users
+            SET firstname = ?, name = ?, region = ?, username = ?, email = ?, role = ?
+            WHERE id = ?
+        """, (
+            self.firstname,
+            self.name,
+            self.region,
+            self.username,
+            self.email,
+            int(self.role),
+            self.id
+        ))
+        con.commit()
+        con.close()
+
     @staticmethod
     def login_admin(username: str, custom_message = "Invalid password, retry"):
         limit_time = datetime.datetime.now() - datetime.timedelta(hours=8)
@@ -92,6 +112,18 @@ class User:
         finally:
             con.close()
     
+    @classmethod
+    def create(cls, firstname: str, name: str, region: str, username: str, email: str, role: Role, password: str):
+        con = sqlite3.connect(DB_PATH)
+        cur = con.cursor()
+        hashed_password = Util.encrypt_password(password)
+        cur.execute("""
+            INSERT INTO users (firstname, name, region, username, email, role, password)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (firstname, name, region, username, email, int(role), hashed_password))
+        con.commit()
+        con.close()
+
     @classmethod
     def from_row(cls, row):
         return cls(

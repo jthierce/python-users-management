@@ -1,5 +1,6 @@
 from .display import Display
-from .user import User
+from .user import User, Role
+from .utils import Util
 from enum import IntEnum
 
 class MenuType(IntEnum):
@@ -36,16 +37,18 @@ class Menu:
                 Menu.find_user()
             case MenuType.CREATED_USER.value:
                 data = Display.ask_create_user()
-
-                new_user = User(
-                    firstname=data["firstname"],
-                    name=data["name"],
-                    region=data["region"],
-                    username=data["username"],
-                    email=data["email"],
-                    role=Role.USER
+                # Get the password from the user and generate a random one if the user doesn't want to set a password
+                if not data["password"]:
+                    data["password"] = Util.generate_password(12)
+                    print(f"Generated password: {data['password']}")
+                User.create(data["firstname"],
+                    data["name"],
+                    data["region"],
+                    data["username"],
+                    data["email"],
+                    Role.USER,
+                    data["password"]
                 )
-                new_user.create(data["password"])
                 Display.user_created()
             case 4:
                 print("\nBye")
@@ -53,7 +56,6 @@ class Menu:
         
     @staticmethod
     def user(user: User, selected_user: User):
-        #Rajouter aussi la methode pour ceci
         Display.display_user(user)
         choice = Display.ask_user()
         
@@ -61,8 +63,16 @@ class Menu:
             case(1):
                 return Menu.update_user(user, selected_user)
             case(2):
-                user.delete_user(selected_user)
-                print("User deleted succesfully")
+                confirm = input("Are you sure you want to delete this user? (y/n): ")
+                if confirm.lower() == "y":
+                    if selected_user.role == Role.SUPER_ADMIN and user.role != Role.SUPER_ADMIN:
+                        print("You are not authorized to delete a super admin user.")
+                        return True
+                    if selected_user.role == Role.ADMIN and user.role != Role.SUPER_ADMIN:
+                        print("You are not authorized to delete an admin user.")
+                        return True
+                    selected_user.delete()
+                    print("User deleted successfully")
                 return True
             case(3):
                 return True
@@ -70,33 +80,36 @@ class Menu:
     @staticmethod
     def update_user(user:User, updated_user: User):
         Display.diplay_update_user()
-        match(Display.ask_update_user()):
-            case 0:
-                return True
-            case 1:
-                new_firstname = input("Insert the new firstname")
-                user.udpate_firstname(updated_user)
-                print("Updated firstname succesfully")
-                return True
-            case 2:
-                new_name = input("Insert the new name")
-                user.update_name(updated_user)
-            case 3:
-                # si on a envie rajouter une constante qui permet de chosir des regions fix
-                # d'ailleurs on pourrait lock le choix des regions dans la db
-                new_region = input("Insert the new region")
-                user.update_region(updated_user)
-                return True
-            case 4:
-                new_username = input("Insert the new username")
-                user.update_username(updated_user)
-                return True
-            case 5:
-                new_email = input("Insert the new email")
-                user.update_email(updated_user)
-                return True
-            case 6:
-                return Menu.update_role_user(user, updated_user)
+        want_to_stop = False
+        while not want_to_stop:
+            match(Display.ask_update_user()):
+                case 0:
+                    want_to_stop = True
+                case 1:
+                    new_firstname = input("Insert the new firstname")
+                    updated_user.firstname = new_firstname
+                case 2:
+                    new_name = input("Insert the new name")
+                    updated_user.name = new_name
+                case 3:
+                    # si on a envie rajouter une constante qui permet de chosir des regions fix
+                    # d'ailleurs on pourrait lock le choix des regions dans la db
+                    new_region = input("Insert the new region")
+                    updated_user.region = new_region
+                case 4:
+                    new_username = input("Insert the new username")
+                    updated_user.username = new_username
+                case 5:
+                    new_email = input("Insert the new email")
+                    updated_user.email = new_email
+                case 6:
+                    if user.role < Role.SUPER_ADMIN:
+                        print("Unauthorized access")
+                        continue
+                    new_role = Menu.update_role_user(user, updated_user)
+                    if not new_role == 0:
+                        updated_user.role = Role(new_role)
+        updated_user.save()     
         return True
     
     @staticmethod
@@ -104,9 +117,8 @@ class Menu:
         Display.display_role_user()
         new_role = Display.ask_role_user()
         if new_role == 0:
-            return True
-        User.update_role(updated_user, new_role)
-        return True
+            return 0
+        return new_role
         
     @staticmethod
     def created_user():
