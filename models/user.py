@@ -24,12 +24,13 @@ class User:
     role: Role = Role.USER
     blocked_at: Optional[str] = None
     
-    UPDATABLE_FIELD = ["firstname", "name", "region", "email", "role"]
+    UPDATABLE_FIELD = ["firstname", "name", "region", "role"]
     SEARCHABLE_FIELD = {
         1: "name",
         2: "firstname",
-        3: "email",
-        4: "region"
+        3: "username",
+        4: "email",
+        5: "region"
     }
 
     def list(self):
@@ -155,3 +156,19 @@ class User:
             row["role"],
             row["blocked_at"],
         )
+    
+    @staticmethod
+    def generate_username(firstname, name):
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        cur.execute("""
+            SELECT COUNT(*) as count
+            FROM users
+            WHERE firstname LIKE ?
+                AND name LIKE ?
+        """, (firstname, name))
+        row = cur.fetchone()
+        if row["count"] > 0:
+            return (firstname[0] + name + str(row["count"])).lower()
+        return (firstname[0] + name).lower()

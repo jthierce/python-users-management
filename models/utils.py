@@ -17,5 +17,5 @@ class Util:
         return ''.join(random.choice(characters) for i in range(length))
     
     @staticmethod
-    def generate_username(firstname, name):
-        return (firstname[0] + name).lower()
+    def generate_email(username):
+        return f"{username}@american-hosptial.intranet"

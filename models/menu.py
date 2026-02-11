@@ -35,10 +35,12 @@ class Menu:
                         data["password"] = Util.generate_password(12)
                         # Display the generated password to the user, don't put in production, it's just for testing
                         print(f"Generated password: {data['password']}")
+                    username = User.generate_username(data["firstname"], data["name"])
+                    data["email"] = Util.generate_email(username)
                     User.create(data["firstname"],
                         data["name"],
                         data["region"],
-                        Util.generate_username(data["firstname"], data["name"]),
+                        username,
                         data["email"],
                         Role.USER,
                         data["password"]
@@ -110,21 +112,19 @@ class Menu:
                 case 1:
                     new_firstname = input("Insert the new firstname").strip().lower()
                     updated_user.firstname = new_firstname
-                    updated_user.username = Util.generate_username(new_firstname, updated_user.name)
+                    updated_user.username = User.generate_username(new_firstname, updated_user.name)
+                    updated_user.email = Util.generate_email(updated_user.username)
                 case 2:
                     new_name = input("Insert the new name").strip().lower()
                     updated_user.name = new_name
-                    updated_user.username = Util.generate_username(updated_user.firstname, new_name)
+                    updated_user.username = User.generate_username(updated_user.firstname, new_name)
+                    updated_user.email = Util.generate_email(updated_user.username)
                 case 3:
                     # si on a envie rajouter une constante qui permet de chosir des regions fix
                     # d'ailleurs on pourrait lock le choix des regions dans la db
                     new_region = input("Insert the new region").strip().lower()
                     updated_user.region = new_region
                 case 4:
-                    # on pourrait rajouter une verification de l'email
-                    new_email = input("Insert the new email").strip().lower()
-                    updated_user.email = new_email
-                case 5:
                     if user.role < Role.SUPER_ADMIN:
                         print("Unauthorized access")
                         continue

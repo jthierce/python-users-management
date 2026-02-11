@@ -99,7 +99,6 @@ class Display:
             "firstname": input("Firstname: ").strip().lower(),
             "name": input("Name: ").strip().lower(),
             "region": input("Region: ").strip().lower(),
-            "email": input("Email: ").strip().lower(),
             "password": getpass.getpass("Password (leave empty to generate a random one): ")
         }
 
