@@ -1,3 +1,4 @@
+import getpass
 from .user import Role, User
 
 PAGE_SIZE = 9
@@ -13,7 +14,7 @@ class Display:
 
     @staticmethod
     def ask_login():
-        return input("Login:\n").lower()
+        return input("Login:\n").lower().strip()
 
     @staticmethod
     def welcome_user(firstname):
@@ -77,11 +78,9 @@ class Display:
     @staticmethod
     def diplay_update_user():
         #Peut etre changer d'une autre facon comment c'est display
-        i = 1
         text_to_display = ""
-        for value in User.UPDATABLE_FIELD:
+        for i, value in User.UPDATABLE_FIELD:
             text_to_display += f"#{i})#{value} "
-            i += 1
         print(text_to_display + "0) exit/save")
     
     @staticmethod
@@ -97,18 +96,12 @@ class Display:
     def ask_create_user():
         print("\n--- CREATE USER ---")
         return {
-            "firstname": input("Firstname: "),
-            "name": input("Name: "),
-            "region": input("Region: "),
-            "username": input("Username: "),
-            "email": input("Email: "),
-            "password": input("Password (leave empty to generate a random one): ")
+            "firstname": input("Firstname: ").strip().lower(),
+            "name": input("Name: ").strip().lower(),
+            "region": input("Region: ").strip().lower(),
+            "email": input("Email: ").strip().lower(),
+            "password": getpass.getpass("Password (leave empty to generate a random one): ")
         }
-    
-    @staticmethod
-    def ask_delete_user():
-        print("\n--- DELETE USER ---")
-        return input("User ID to delete: ")
 
     @staticmethod
     def user_created():
@@ -122,19 +115,19 @@ class Display:
     @staticmethod
     def ask_main_menu(number_of_choice: int):
         valid_inputs = list(range(1, number_of_choice + 1))
-        print(f"Choose a options:")
+        print("Choose a options:")
         user_input = None
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = int(input("[1-#{number_of_choice + 1}]"))
+            user_input = int(input(f"[1-{number_of_choice}]").strip())
         return user_input
 
     @staticmethod
     # a verifier
     def ask_select_users(users_number: int):
         valid_inputs = list(map(str, range(0, users_number + 1)))
-        text = "Choose users [1-9], 0 Exit"
+        text = f"Choose users [1-{users_number}], 0 Exit"
         if users_number is 9:
             text += ", (N) Next page"
             valid_inputs += ["n"]
@@ -143,7 +136,7 @@ class Display:
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = input("Choose users to get the options of him").lower()
+            user_input = input("Choose users to get the options of him").strip().lower()
         return user_input
     
     @staticmethod
@@ -153,7 +146,7 @@ class Display:
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = int(input("[1-3]:"))
+            user_input = int(input("[1-3]:").strip())
         return user_input
     
     @staticmethod
@@ -163,7 +156,7 @@ class Display:
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = int(input(f"[0-#{len(User.UPDATABLE_FIELD)}]"))
+            user_input = int(input(f"[0-#{len(User.UPDATABLE_FIELD)}]").strip())
         return user_input
     
     @staticmethod
@@ -173,5 +166,20 @@ class Display:
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = int(input(f"[0-#{len(Role) + 1}]"))
+            user_input = int(input(f"[0-#{len(Role) + 1}]").strip())
         return user_input
+    
+    @staticmethod
+    def ask_enum_choice():
+        valid_inputs = []
+        for key, value in User.SEARCHABLE_FIELD.items():
+            print(f"{key}: {value}")
+            valid_inputs.append(key)
+        print("0: Exit")
+        valid_inputs.append(0)
+        user_input = None
+        while not user_input in valid_inputs:
+            if not user_input is None:
+                print("Invalid input")
+            user_input = int(input(f"Choose an option [{', '.join(map(str, valid_inputs))}]: ").strip())
+        return user_input or 0

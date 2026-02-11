@@ -15,3 +15,7 @@ class Util:
     def generate_password(length):
         characters = string.ascii_letters + string.digits + string.punctuation
         return ''.join(random.choice(characters) for i in range(length))
+    
+    @staticmethod
+    def generate_username(firstname, name):
+        return (firstname[0] + name).lower()

@@ -60,7 +60,8 @@ try:
     """,
     (name.strip(),
     firstname.strip(),
-    username, username + "@american-hosptial.intranet",
+    username,
+    username + "@american-hosptial.intranet",
     'Paris',
     Util.encrypt_password(password),
     int(Role.SUPER_ADMIN)))

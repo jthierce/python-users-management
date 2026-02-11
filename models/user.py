@@ -24,11 +24,18 @@ class User:
     role: Role = Role.USER
     blocked_at: Optional[str] = None
     
-    UPDATABLE_FIELD = ["firstname", "name", "region", "username", "email", "role"]
+    UPDATABLE_FIELD = ["firstname", "name", "region", "email", "role"]
+    SEARCHABLE_FIELD = {
+        1: "name",
+        2: "firstname",
+        3: "email",
+        4: "region"
+    }
 
     def list(self):
         if (self.role < int(Role.ADMIN)):
             print("Unhautorized access")
+            return []
         con = sqlite3.connect(DB_PATH)
         con.row_factory = sqlite3.Row
         cur = con.cursor()
@@ -91,7 +98,7 @@ class User:
             row = cur.fetchone()
             if row is None:
                 return None
-            same_password = False
+            same_password = None
             for _ in range(3):
                 password = getpass.getpass("Password:\n")
                 same_password = Util.check_password(password, row["password"])
@@ -123,6 +130,18 @@ class User:
         """, (firstname, name, region, username, email, int(role), hashed_password))
         con.commit()
         con.close()
+
+    @staticmethod
+    def find(filters: dict):
+        con = sqlite3.connect(DB_PATH)
+        con.row_factory = sqlite3.Row
+        cur = con.cursor()
+        query = "SELECT * FROM users"
+        if filters:
+            query += " WHERE " + " AND ".join([f"{key} LIKE ?" for key in filters.keys()])
+        cur.execute(query, [f"%{value}%" for value in filters.values()])
+        row = cur.fetchall()
+        return row
 
     @classmethod
     def from_row(cls, row):

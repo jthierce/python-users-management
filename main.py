@@ -1,6 +1,7 @@
 import os
 from typing import Optional
-from models.user import User, Role
+from models import user
+from models.user import User
 from models.display import Display
 from models.menu import Menu, MenuSelection, MenuType
 
@@ -35,15 +36,8 @@ def main():
     if not user or user == -1:
         return 0
     Display.welcome_user(user.firstname)
-
-    user_exit = False
-    menu = MenuSelection(MenuType.MAIN_MENU)
-    while not user_exit:
-        match(menu):
-            case MenuType.MAIN_MENU:
-                user_exit = Menu.main_menu(user)
-            case MenuType.CREATED_USER:
-                user_exit = Menu.created_user()
+    Menu.main_menu(user)
+    return 0
 
 
 if __name__ == "__main__":
