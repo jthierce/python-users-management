@@ -19,3 +19,10 @@ class Util:
     @staticmethod
     def generate_email(username):
         return f"{username}@american-hosptial.intranet"
+    
+    @staticmethod
+    def to_int(value):
+        try:
+            return int(value)
+        except ValueError:
+            return False

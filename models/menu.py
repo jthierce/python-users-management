@@ -19,9 +19,9 @@ class MenuSelection:
 class Menu:
     @staticmethod
     def main_menu(user: User):
-        Display.display_menu()
-        choice = Display.ask_main_menu(len(MenuType))
         while True:
+            Display.display_menu()
+            choice = Display.ask_main_menu(len(MenuType))
             match(choice):
                 case MenuType.LIST_USERS.value:
                     users = user.list()
@@ -55,7 +55,7 @@ class Menu:
         chunks = [users_list[i:i+9] for i in range(0, len(users_list), 9)]
         for i, value in enumerate(chunks):
             Display.display_users(value, i)
-            choice = Display.ask_select_users(len(value))
+            choice = Display.ask_select_users(len(value), i == len(chunks) - 1)
             match(choice):
                 case x if x in list(map(str, range(1, len(value) + 1))):
                     Menu.user(user, User.from_row(value[int(choice) - 1]))
@@ -80,7 +80,7 @@ class Menu:
 
     @staticmethod
     def user(user: User, selected_user: User):
-        Display.display_user(user)
+        Display.display_user(selected_user)
         choice = Display.ask_user()
         
         match(choice):
@@ -89,7 +89,8 @@ class Menu:
             case(2):
                 confirm = input("Are you sure you want to delete this user? (y/n): ").strip().lower()
                 if confirm.lower() == "y":
-                    if selected_user.role == Role.SUPER_ADMIN and user.role != Role.SUPER_ADMIN:
+                    if (selected_user.role == Role.SUPER_ADMIN and user.role != Role.SUPER_ADMIN) or \
+                       (selected_user.role == Role.SUPER_ADMIN and user.id == selected_user.id):
                         print("You are not authorized to delete a super admin user.")
                         return True
                     if selected_user.role == Role.ADMIN and user.role != Role.SUPER_ADMIN:
@@ -104,25 +105,24 @@ class Menu:
     @staticmethod
     def update_user(user:User, updated_user: User):
         Display.diplay_update_user()
-        want_to_stop = False
-        while not want_to_stop:
+        while True:
             match(Display.ask_update_user()):
                 case 0:
-                    want_to_stop = True
+                    break
                 case 1:
-                    new_firstname = input("Insert the new firstname").strip().lower()
+                    new_firstname = input("Insert the new firstname\n").strip().lower()
                     updated_user.firstname = new_firstname
                     updated_user.username = User.generate_username(new_firstname, updated_user.name)
                     updated_user.email = Util.generate_email(updated_user.username)
                 case 2:
-                    new_name = input("Insert the new name").strip().lower()
+                    new_name = input("Insert the new name\n").strip().lower()
                     updated_user.name = new_name
                     updated_user.username = User.generate_username(updated_user.firstname, new_name)
                     updated_user.email = Util.generate_email(updated_user.username)
                 case 3:
                     # si on a envie rajouter une constante qui permet de chosir des regions fix
                     # d'ailleurs on pourrait lock le choix des regions dans la db
-                    new_region = input("Insert the new region").strip().lower()
+                    new_region = input("Insert the new region\n").strip().lower()
                     updated_user.region = new_region
                 case 4:
                     if user.role < Role.SUPER_ADMIN:

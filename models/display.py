@@ -1,5 +1,6 @@
 import getpass
 from .user import Role, User
+from .utils import Util
 
 PAGE_SIZE = 9
 
@@ -24,35 +25,27 @@ class Display:
     def display_menu():
         print("\n--- SUPER ADMIN MENU ---")
         print("1. List users")
-        print("2. Create user")
-        print("3. Delete user")
+        print("2. Find user")
+        print("3. Create user")
         print("4. Exit")
 
     @staticmethod
-    # Ajouter en mode csv en gros on a un header avec firstname lastname region etc
-    # et ensuite on affiche que les infos du header
-    # rajouter un index a cote de chaque user de 1 - 9 pour les selctionner
-    def display_users(users, page: int):
+    def users_correct_display(users: list[dict]):
         if not users:
             print("\n--- USERS LIST ---")
             print("No users found.\n")
             return
 
-        total = len(users)
-
         headers = ["Firstname", "Name", "Username", "Email", "Region","Role"]
-
-        start = page * PAGE_SIZE
-        end = start + PAGE_SIZE
 
         print("\n--- USERS LIST ---")
 
         rows = [
-            [u.firstname, u.name, u.username, u.email, u.region, Role(u.role)] for u in users
+            [u["firstname"], u["name"], u["username"], u["email"], u["region"], Role(u["role"])] for u in users
         ]
 
         col_widths = [
-            max(len(row[i]) for row in ([headers] + rows)) for i in range(len(headers))
+            max(len(str(row[i])) for row in ([headers] + rows)) for i in range(len(headers))
         ]
 
         header_line = " | ".join(
@@ -64,23 +57,30 @@ class Display:
         for row in rows:
             print(
                 " | ".join(
-                    row[i].ljust(col_widths[i]) for i in range(len(row))
+                    str(row[i]).ljust(col_widths[i]) for i in range(len(row))
                 )
             )
-
+              
+    @staticmethod
+    # Ajouter en mode csv en gros on a un header avec firstname lastname region etc
+    # et ensuite on affiche que les infos du header
+    # rajouter un index a cote de chaque user de 1 - 9 pour les selctionner
+    def display_users(users, page: int):
+        Display.users_correct_display(users)
+        total = len(users)
         print(f"\nPage {page + 1} / {((total - 1) // PAGE_SIZE) + 1}")
         
     @staticmethod
     def display_user(user: User):
-        # Rajouter les infos du user prorement, ensuite le menu 1) Update, 2)Delete 3)Exit
+        Display.users_correct_display([user.__dict__])
         print("1)Update,2)Delete,3)exit")
     
     @staticmethod
     def diplay_update_user():
         #Peut etre changer d'une autre facon comment c'est display
         text_to_display = ""
-        for i, value in User.UPDATABLE_FIELD:
-            text_to_display += f"#{i})#{value} "
+        for i, value in enumerate(User.UPDATABLE_FIELD):
+            text_to_display += f"{i + 1}) {value}\n"
         print(text_to_display + "0) exit/save")
     
     @staticmethod
@@ -119,15 +119,15 @@ class Display:
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = int(input(f"[1-{number_of_choice}]").strip())
+            user_input = Util.to_int(input(f"[1-{number_of_choice}]").strip())
         return user_input
 
     @staticmethod
     # a verifier
-    def ask_select_users(users_number: int):
+    def ask_select_users(users_number: int, is_last_page: bool = True):
         valid_inputs = list(map(str, range(0, users_number + 1)))
         text = f"Choose users [1-{users_number}], 0 Exit"
-        if users_number is 9:
+        if not is_last_page:
             text += ", (N) Next page"
             valid_inputs += ["n"]
         print(text)
@@ -135,7 +135,7 @@ class Display:
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = input("Choose users to get the options of him").strip().lower()
+            user_input = input().strip().lower()
         return user_input
     
     @staticmethod
@@ -145,7 +145,7 @@ class Display:
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = int(input("[1-3]:").strip())
+            user_input = Util.to_int(input("[1-3]:").strip())
         return user_input
     
     @staticmethod
@@ -155,7 +155,7 @@ class Display:
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = int(input(f"[0-#{len(User.UPDATABLE_FIELD)}]").strip())
+            user_input = Util.to_int(input(f"[0-{len(User.UPDATABLE_FIELD)}]").strip())
         return user_input
     
     @staticmethod
@@ -165,7 +165,7 @@ class Display:
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = int(input(f"[0-#{len(Role) + 1}]").strip())
+            user_input = Util.to_int(input(f"[0-#{len(Role) + 1}]").strip())
         return user_input
     
     @staticmethod
@@ -180,5 +180,5 @@ class Display:
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = int(input(f"Choose an option [{', '.join(map(str, valid_inputs))}]: ").strip())
+            user_input = Util.to_int(input(f"Choose an option [{', '.join(map(str, valid_inputs))}]: ").strip())
         return user_input or 0

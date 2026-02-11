@@ -43,9 +43,10 @@ class User:
         cur.execute("""
             SELECT *
             FROM users
-            ORDER BY name, firstname
+            ORDER BY username
         """)
         row = cur.fetchall()
+        con.close()
         return row
     
     def delete(self):
@@ -142,6 +143,7 @@ class User:
             query += " WHERE " + " AND ".join([f"{key} LIKE ?" for key in filters.keys()])
         cur.execute(query, [f"%{value}%" for value in filters.values()])
         row = cur.fetchall()
+        con.close()
         return row
 
     @classmethod
@@ -169,6 +171,7 @@ class User:
                 AND name LIKE ?
         """, (firstname, name))
         row = cur.fetchone()
+        con.close()
         if row["count"] > 0:
             return (firstname[0] + name + str(row["count"])).lower()
         return (firstname[0] + name).lower()
