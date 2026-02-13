@@ -2,8 +2,6 @@ import getpass
 from .user import Role, User
 from .utils import Util
 
-PAGE_SIZE = 9
-
 class Display:
 
     @staticmethod
@@ -81,13 +79,10 @@ class Display:
 
               
     @staticmethod
-    # Ajouter en mode csv en gros on a un header avec firstname lastname region etc
-    # et ensuite on affiche que les infos du header
-    # rajouter un index a cote de chaque user de 1 - 9 pour les selctionner
-    def display_users(users, page: int):
-        Display.users_correct_display(users, with_index=True)
+    def display_users(users, page: int, total_pages: int):
+        Display.users_correct_display(users)
         total = len(users)
-        print(f"\nPage {page + 1} / {((total - 1) // PAGE_SIZE) + 1}")
+        print(f"\nPage {page + 1} / {total_pages}")
         
     @staticmethod
     def display_user(user: User):
@@ -124,11 +119,6 @@ class Display:
     @staticmethod
     def user_created():
         print("User created successfully\n")
-
-    # Vraiment utile?
-    @staticmethod
-    def user_deleted():
-        print("User deleted successfully\n")
 
     @staticmethod
     def ask_main_menu(number_of_choice: int):
