@@ -49,7 +49,7 @@ class Display:
                 u["username"],
                 u["email"],
                 u["region"],
-                Role(u["role"])
+                Role(u["role"]).name.title()
             ]
 
             if with_index:
@@ -80,8 +80,7 @@ class Display:
               
     @staticmethod
     def display_users(users, page: int, total_pages: int):
-        Display.users_correct_display(users)
-        total = len(users)
+        Display.users_correct_display(users, with_index=True)
         print(f"\nPage {page + 1} / {total_pages}")
         
     @staticmethod
@@ -169,13 +168,13 @@ class Display:
     
     @staticmethod
     def ask_role_user():
-        valid_inputs = list(range(0, len(Role) + 1))
+        valid_inputs = list(range(0, len(Role)))
         user_input = None
         while not user_input in valid_inputs:
             if not user_input is None:
                 print("Invalid input")
-            user_input = Util.to_int(input(f"[0-#{len(Role) + 1}]").strip())
-        return user_input
+            user_input = Util.to_int(input(f"[0-{len(Role) - 1}]").strip())
+        return user_input - 1
     
     @staticmethod
     def ask_enum_choice():

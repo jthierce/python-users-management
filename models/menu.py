@@ -129,7 +129,7 @@ class Menu:
                         print("Unauthorized access")
                         continue
                     new_role = Menu.update_role_user(user, updated_user)
-                    if not new_role == 0:
+                    if not new_role == -1:
                         updated_user.role = Role(new_role)
         updated_user.save()     
         return True
@@ -138,8 +138,8 @@ class Menu:
     def update_role_user(user: User, updated_user: User):
         Display.display_role_user()
         new_role = Display.ask_role_user()
-        if new_role == 0:
-            return 0
+        if new_role == -1:
+            return -1
         return new_role
         
     @staticmethod
