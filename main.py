@@ -1,9 +1,8 @@
 import os
 from typing import Optional
-from models import user
 from models.user import User
 from models.display import Display
-from models.menu import Menu, MenuSelection, MenuType
+from models.menu import Menu
 
 MAX_ATTEMPTS = 3
 DB_PATH = "db/Patient-First.db"
