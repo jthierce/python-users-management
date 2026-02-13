@@ -54,7 +54,7 @@ class Menu:
     def list_users(user: User, users_list: list[User]):
         chunks = [users_list[i:i+9] for i in range(0, len(users_list), 9)]
         for i, value in enumerate(chunks):
-            Display.display_users(value, i)
+            Display.display_users(value, i, len(chunks))
             choice = Display.ask_select_users(len(value), i == len(chunks) - 1)
             match(choice):
                 case x if x in list(map(str, range(1, len(value) + 1))):
