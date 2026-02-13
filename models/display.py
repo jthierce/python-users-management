@@ -30,26 +30,43 @@ class Display:
         print("4. Exit")
 
     @staticmethod
-    def users_correct_display(users: list[dict]):
+    def users_correct_display(users: list[dict], with_index: bool = False):
         if not users:
             print("\n--- USERS LIST ---")
             print("No users found.\n")
             return
 
-        headers = ["Firstname", "Name", "Username", "Email", "Region","Role"]
+        headers = ["Firstname", "Name", "Username", "Email", "Region", "Role"]
+
+        if with_index:
+            headers = ["#"] + headers
 
         print("\n--- USERS LIST ---")
 
-        rows = [
-            [u["firstname"], u["name"], u["username"], u["email"], u["region"], Role(u["role"])] for u in users
-        ]
+        rows = []
+        for idx, u in enumerate(users, start=1):
+            row = [
+                u["firstname"],
+                u["name"],
+                u["username"],
+                u["email"],
+                u["region"],
+                Role(u["role"])
+            ]
+
+            if with_index:
+                row = [idx] + row
+
+            rows.append(row)
 
         col_widths = [
-            max(len(str(row[i])) for row in ([headers] + rows)) for i in range(len(headers))
+            max(len(str(row[i])) for row in ([headers] + rows))
+            for i in range(len(headers))
         ]
 
         header_line = " | ".join(
-            headers[i].ljust(col_widths[i]) for i in range(len(headers))
+            str(headers[i]).ljust(col_widths[i])
+            for i in range(len(headers))
         )
         print(header_line)
         print("-" * len(header_line))
@@ -57,16 +74,18 @@ class Display:
         for row in rows:
             print(
                 " | ".join(
-                    str(row[i]).ljust(col_widths[i]) for i in range(len(row))
+                    str(row[i]).ljust(col_widths[i])
+                    for i in range(len(row))
                 )
             )
+
               
     @staticmethod
     # Ajouter en mode csv en gros on a un header avec firstname lastname region etc
     # et ensuite on affiche que les infos du header
     # rajouter un index a cote de chaque user de 1 - 9 pour les selctionner
     def display_users(users, page: int):
-        Display.users_correct_display(users)
+        Display.users_correct_display(users, with_index=True)
         total = len(users)
         print(f"\nPage {page + 1} / {((total - 1) // PAGE_SIZE) + 1}")
         
