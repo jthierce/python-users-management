@@ -141,7 +141,3 @@ class Menu:
         if new_role == -1:
             return -1
         return new_role
-        
-    @staticmethod
-    def created_user():
-        return False
